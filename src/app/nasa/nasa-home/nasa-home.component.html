@@ -1,0 +1,38 @@
+<mat-toolbar color="primary">
+  <div fxFlex="40" fxFlexOffset="10">
+    <span>{{date}}</span>
+  </div>
+  <div fxFlex="10" fxFlexOffset="10">
+    <button mat-button color="accent" routerLink="/">Home</button>
+  </div>
+</mat-toolbar>
+<div fxLayout="row" *ngIf="nearEarthObjects" fxLayout.sm="column" fxLayout.xs="column">
+  <p fxFlex="40" style="padding:20px;">
+    <mat-card>
+        Today, There are {{nearEarthObjects.near_earth_objects[date].length}} Astroids being tracked by NASA near earth averaging
+        {{avgSize | number}} Meters wide, traveling {{avgSpeed | number}} Kilometers / hour, and missing earth by {{avgDistance | number}}
+        Kilometers.
+    </mat-card>
+  </p>
+  <div fxFlex="50" style="margin-top: 5vh;">
+    <mat-accordion>
+      <mat-expansion-panel *ngFor="let object of nearEarthObjects.near_earth_objects[date]">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            {{object.name}}
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div fxLayout="row">
+          <div fxFlex="50" fxLayout="column">
+            <span>Size: {{object.estimated_diameter.meters.estimated_diameter_max | number}} Meters Wide</span>
+            <span>Speed: {{object.close_approach_data[0].relative_velocity.kilometers_per_hour | number}} Kilometers/Hour</span>
+            <span>Distance: {{object.close_approach_data[0].miss_distance.kilometers | number}} Kilometers from Earth</span>          
+          </div>
+          <div fxFlex="20" fxFlexOffset="15" fxLayout="column">
+              <a mat-fab href="{{object.nasa_jpl_url}}"><i class="fa fa-2x fa-hand-o-right"></i></a>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+</div>

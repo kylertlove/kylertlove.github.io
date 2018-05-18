@@ -25,7 +25,7 @@ export class DrawComponent implements OnInit {
     this.aboutMeImg = new Image();
     this.aboutMeImg.src = "/assets/images/tacos.png";
     this.aboutMeImg.onload = () => {
-      this.ctx.drawImage(this.aboutMeImg, 0, 30, 230, 62);
+      this.ctx.drawImage(this.aboutMeImg, 5, 5, 220, 105);
     }
   }
 
@@ -38,6 +38,7 @@ export class DrawComponent implements OnInit {
 
     setInterval(() => {
       this.color = this.getRandomColor();
+      canvas.style.boxShadow = "0 0 5px black";
     }, 600);
 
     setInterval(() => {

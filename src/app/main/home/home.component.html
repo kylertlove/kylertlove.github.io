@@ -2,89 +2,46 @@
 
 <div fxLayout="row" fxLayout.sm="column" fxLayout.xs="column">
 
-<mat-toolbar color="primary" style="height: 100vh;" fxFlex="15">
-    <mat-toolbar-row>
+    <mat-toolbar color="primary" style="height: 100vh;" fxFlex="15">
+        <mat-toolbar-row>
             <span class="heading">Kyler Love</span>
-    </mat-toolbar-row>
+        </mat-toolbar-row>
 
-    <mat-toolbar-row>
+        <mat-toolbar-row>
             <mat-slide-toggle (change)="darkmode()" [checked]="factory.isDarkMode"></mat-slide-toggle>
-                    
-    </mat-toolbar-row>
-</mat-toolbar>
+        </mat-toolbar-row>
+    </mat-toolbar>
 
-<mat-card style="height: 100vh;" fxFlex="85">
-    <mat-tab-group dynamicHeight='true'>
-        <mat-tab label="About Me">
-                <app-draw></app-draw>
-        </mat-tab>
-        <mat-tab label="Projects">
-            <div fxLayout="row">
-                <ngx-carousel style="height:80vh;" fxFlex="100" [inputs]="carouselOne" (carouselLoad)="myfunc($event)">
-                    <ngx-item NgxCarouselItem style="height:75vh;">
-                        <div fxLayout="row">
-                            <mat-card fxFlexOffset="16" fxFlex="66" class="dronesLink" routerLink="/drones">
-                                <mat-card-header>
-                                    <div mat-card-avatar>
-                                        <i class="fa fa-2x fa-rocket"></i>
-                                    </div>
-                                    <mat-card-title>Drones</mat-card-title>
-                                </mat-card-header>
-                                <mat-card-content>
-                                    <p>
-                                        Simple Javascript/Canvas arcade game
-                                    </p>
-                                </mat-card-content>
-                            </mat-card>
-                        </div>
-
-                    </ngx-item>
-                    <ngx-item NgxCarouselItem style="height:75vh;">
-                        <div fxLayout="row">
-                            <mat-card fxFlexOffset="16" fxFlex="66" class="nasaLink" routerLink="/nasa">
-                                <mat-card-header>
-                                    <div mat-card-avatar>
-                                        <i class="fa fa-2x fa-rocket"></i>
-                                    </div>
-                                    <mat-card-title>Near Earth Objects</mat-card-title>
-                                </mat-card-header>
-                                <mat-card-content>
-                                    <p>
-                                        Nasa data that shows all near earth objects for today
-                                    </p>
-                                </mat-card-content>
-                            </mat-card>
-                        </div>
-                    </ngx-item>
-                    <button NgxCarouselPrev class='leftRs' mat-fab>
-                        <i class="fa fa-chevron-left"></i>
-                    </button>
-                    <button NgxCarouselNext class='rightRs' mat-fab color="primary">
-                        <i class="fa fa-chevron-right"></i>
-                    </button>
-                </ngx-carousel>
-            </div>
-        </mat-tab>
-        <mat-tab label="Contact">
-            <div style="margin:5%;">
-                <h4>Kyler.Love@gmail.com</h4>
-                <h5>Philadelphia, PA</h5>
-                <div class="button-row">
-                    <button mat-fab color="primary" (click)="routeTo('facebook')">
+    <mat-card style="height: 100vh;" fxFlex="85">
+        <mat-tab-group dynamicHeight='true'>
+            <mat-tab label="About Me">
+                <div fxLayout="row" fxLayoutAlign="center center">
+                    <app-draw></app-draw>
+                </div>
+            </mat-tab>
+            <mat-tab label="Projects">
+                <app-project-list></app-project-list>
+            </mat-tab>
+            <mat-tab label="Contact">
+                <div style="margin:5%;">
+                    <h4>Kyler.Love@gmail.com</h4>
+                    <h5>Philadelphia, PA</h5>
+                    <div class="button-row">
+                        <button mat-fab color="primary" (click)="routeTo('facebook')">
                         <span class="fa fa-2x fa-facebook"></span>
                     </button>
-                    <button mat-fab color="accent" (click)="routeTo('github')">
+                        <button mat-fab color="accent" (click)="routeTo('github')">
                         <span class="fa fa-2x fa-github"></span>
                     </button>
-                    <button mat-fab color="primary" (click)="routeTo('linkedin')">
+                        <button mat-fab color="primary" (click)="routeTo('linkedin')">
                         <span class="fa fa-2x fa-linkedin"></span>
                     </button>
-                    <button mat-fab color="accent" (click)="routeTo('insta')">
+                        <button mat-fab color="accent" (click)="routeTo('insta')">
                         <span class="fa fa-2x fa-instagram"></span>
                     </button>
+                    </div>
                 </div>
-            </div>
-        </mat-tab>
-    </mat-tab-group>
-</mat-card>
+            </mat-tab>
+        </mat-tab-group>
+    </mat-card>
 </div>

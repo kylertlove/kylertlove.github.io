@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from "@angular/router";
 import { FactoryService } from 'app/main/factory.service';
-import { NgxCarousel } from 'ngx-carousel';
 
 @Component({
   selector: 'app-home',
@@ -11,26 +10,12 @@ import { NgxCarousel } from 'ngx-carousel';
 export class HomeComponent implements OnInit {
 
   public isNavbarCollapsed = true;
-  public carouselOne: NgxCarousel;
 
   constructor(public factory:FactoryService) {
   }
 
   ngOnInit() {
-    this.changeBG();
-    this.carouselOne = {
-      grid: {xs: 1, sm: 1, md: 1, lg: 1, all: 0},
-      slide: 1,
-      speed: 600,
-      interval: 6000,
-      point: {
-        visible: true
-      },
-      load: 2,
-      touch: true,
-      loop: true,
-      custom: 'banner'
-    }
+
   }
   
   routeTo =(loc) => {

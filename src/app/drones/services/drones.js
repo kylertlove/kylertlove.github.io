@@ -167,7 +167,7 @@ define("model/player.drones", ["require", "exports", "model/user.drones", "model
             var _this = _super.call(this, 'fff', 90, 40, 200, 200) || this;
             _this.playerVelocity = 250;
             _this.maxHealth = 60;
-            _this.health = 1;
+            _this.health = 50;
             _this.hasSprayPowerUp = false;
             _this.hasExplosionVelocity = false;
             _this.hasRoFpowerUp = false;
@@ -600,6 +600,11 @@ define("model/hud", ["require", "exports", "services/asset-manager", "model/Canv
             canvas.fillStyle = "black";
             canvas.fillText(startText.word, startText.x, startText.y);
             btnList.push(startButton);
+            var rules = new CanvasMenuObjects_1.CanvasText("Controls: Move: Arrow keys, Shoot: spacebar, Missles: left Ctrl", (canvas.canvas.width / 2) - 50, title.y + (title.y / 2), this.textColor, "15px Arial");
+            canvas.font = rules.font;
+            canvas.fillStyle = rules.color;
+            canvas.textAlign = "center";
+            canvas.fillText(rules.word, rules.x, rules.y);
             return btnList;
         };
         Hud.prototype.pauseScreen = function (canvas) {

@@ -1,5 +1,37 @@
-<app-drones-audio #audioComponent></app-drones-audio>
-<a routerLink="/home">home</a>
-<div style="width:100%">
-    <canvas #myCanvas></canvas>
+<div class="gameBoardDiv">
+<canvas id="canvasElem"></canvas>
+
+<style>
+  /* Not needed but I like it */
+  canvas {
+  margin: 0;
+  padding: 0;
+  background: url('./assets/drone-images/sky.jpg');
+  background-size: cover;
+  position: relative;
+  font-family: Arial, Helvetica, sans-serif;
+  overflow: hidden;
+  background-repeat: repeat;
+  -webkit-animation: animate-background linear 90s infinite;
+  animation: animate-background linear 90s infinite;
+}
+
+@-webkit-keyframes animate-background {
+  from {
+      background-position: 0px 0px;
+  }
+  to {
+      background-position: -1000px 0px;
+  }
+}
+
+@keyframes animate-background {
+  from {
+      background-position: 0px 0px;
+  }
+  to {
+      background-position: -1000px 0px;
+  }
+}
+</style>
 </div>

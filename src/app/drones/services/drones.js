@@ -53,11 +53,11 @@ define("services/key-status", ["require", "exports"], function (require, exports
     }());
     exports.KeyDown = KeyDown;
 });
-define("model/entity.drones", ["require", "exports"], function (require, exports) {
+define("model/entity", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
 });
-define("model/user.drones", ["require", "exports"], function (require, exports) {
+define("model/user", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var User = /** @class */ (function () {
@@ -158,20 +158,24 @@ define("model/playerBullets", ["require", "exports", "model/projectile", "servic
     }(projectile_1.Projectile));
     exports.PlayerBullets = PlayerBullets;
 });
-define("model/player.drones", ["require", "exports", "model/user.drones", "model/playerBullets", "services/asset-manager"], function (require, exports, user_drones_1, playerBullets_1, asset_manager_2) {
+define("model/player", ["require", "exports", "model/user", "model/playerBullets", "services/asset-manager"], function (require, exports, user_1, playerBullets_1, asset_manager_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var Player = /** @class */ (function (_super) {
         __extends(Player, _super);
         function Player() {
             var _this = _super.call(this, 'fff', 90, 40, 200, 200) || this;
+            _this.shieldSpriteNum = 1;
+            _this.shieldTick = 10;
             _this.playerVelocity = 250;
             _this.maxHealth = 60;
+            _this.baseSprite = asset_manager_2.ASSETS.PREPEND + "drone-images/playerShip1.png";
             _this.health = 50;
             _this.hasSprayPowerUp = false;
+            _this.hasShield = false;
             _this.hasExplosionVelocity = false;
             _this.hasRoFpowerUp = false;
-            _this.sprite.src = asset_manager_2.ASSETS.PREPEND + "drone-images/playerShip1.png";
+            _this.sprite.src = _this.baseSprite;
             return _this;
         }
         Player.prototype.update = function (canvas, keyHandler, dT) {
@@ -187,6 +191,12 @@ define("model/player.drones", ["require", "exports", "model/user.drones", "model
             if (keyHandler.isRight()) {
                 this.X += this.X > canvas.canvas.width - 20 ? 0 : this.playerVelocity * dT;
             }
+            //remove shields after 1000 ticks
+            if (this.hasShield && this.shieldTick <= 0) {
+                clearInterval(this.loopShieldSprites);
+                this.hasShield = false;
+                this.sprite.src = this.baseSprite;
+            }
         };
         Player.prototype.midpoint = function () {
             return {
@@ -201,12 +211,17 @@ define("model/player.drones", ["require", "exports", "model/user.drones", "model
         };
         /** Override explosion function */
         Player.prototype.explode = function () {
-            this.hasSprayPowerUp = false;
-            this.health--;
-            if (this.health <= 0) {
-                return true;
+            if (!this.hasShield) {
+                this.hasSprayPowerUp = false;
+                this.health--;
+                if (this.health <= 0) {
+                    return true;
+                }
+                return false;
             }
-            return false;
+            else {
+                this.shieldTick--;
+            }
         };
         /** Call to add Health to the player */
         Player.prototype.addHealth = function (amount) {
@@ -215,17 +230,34 @@ define("model/player.drones", ["require", "exports", "model/user.drones", "model
                 this.health = this.maxHealth;
             }
         };
+        /** Activate Shield Boost */
+        Player.prototype.activateShield = function () {
+            var _this = this;
+            clearInterval(this.loopShieldSprites);
+            this.shieldTick = 10;
+            this.hasShield = true;
+            this.loopShieldSprites = setInterval(function () {
+                _this.shieldSpriteNum++;
+                if (_this.shieldSpriteNum === 6) {
+                    _this.shieldSpriteNum = 1;
+                }
+                _this.sprite.src = asset_manager_2.ASSETS.PREPEND + "drone-images/playerShip-shield-" + _this.shieldSpriteNum + ".png";
+            }, 80);
+        };
         /** Lose all powerups */
         Player.prototype.losePowerUps = function () {
             this.hasSprayPowerUp = false;
             this.hasExplosionVelocity = false;
             this.hasRoFpowerUp = false;
         };
+        Player.prototype.draw = function (canvas) {
+            canvas.drawImage(this.sprite, this.X, this.Y, this.Width, this.Height);
+        };
         return Player;
-    }(user_drones_1.User));
+    }(user_1.User));
     exports.Player = Player;
 });
-define("model/enemy.drones", ["require", "exports", "model/projectile", "services/asset-manager"], function (require, exports, projectile_2, asset_manager_3) {
+define("model/enemy-drones", ["require", "exports", "model/projectile", "services/asset-manager"], function (require, exports, projectile_2, asset_manager_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var Enemy = /** @class */ (function (_super) {
@@ -266,7 +298,7 @@ define("model/enemy.drones", ["require", "exports", "model/projectile", "service
     }(projectile_2.Projectile));
     exports.Enemy = Enemy;
 });
-define("model/powerup.drones", ["require", "exports", "model/user.drones", "services/asset-manager"], function (require, exports, user_drones_2, asset_manager_4) {
+define("model/powerups", ["require", "exports", "model/user", "services/asset-manager"], function (require, exports, user_2, asset_manager_4) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var Powerup = /** @class */ (function (_super) {
@@ -292,36 +324,45 @@ define("model/powerup.drones", ["require", "exports", "model/user.drones", "serv
                 this.Y >= 0 && this.Y <= canvas.canvas.height;
         };
         Powerup.prototype.getNewType = function () {
-            var rand = Math.random() * 10;
-            if (rand >= 0 && rand < 3) {
+            //testing shield
+            // this.sprite.src = ASSETS.PREPEND + "drone-images/powerup-shield.png";
+            // this.type = PowerUpType.Shield;
+            var rand = Math.random() * 100;
+            if (rand >= 0 && rand < 20) {
                 this.sprite.src = asset_manager_4.ASSETS.PREPEND + "drone-images/powerup-spray.png";
                 this.type = PowerUpType.Spray;
             }
-            else if (rand >= 3 && rand < 5) {
+            else if (rand >= 20 && rand < 40) {
                 this.sprite.src = asset_manager_4.ASSETS.PREPEND + "drone-images/powerup-health.png";
                 this.type = PowerUpType.Health;
             }
-            else if (rand >= 5 && rand < 7) {
+            else if (rand >= 40 && rand < 60) {
                 this.sprite.src = asset_manager_4.ASSETS.PREPEND + "drone-images/powerup-explosionVelocity.png";
                 this.type = PowerUpType.explosionVelocity;
             }
-            else if (rand >= 7) {
+            else if (rand >= 60 && rand < 80) {
+                this.sprite.src = asset_manager_4.ASSETS.PREPEND + "drone-images/powerup-shield.png";
+                this.type = PowerUpType.Shield;
+            }
+            else if (rand >= 80) {
                 this.sprite.src = asset_manager_4.ASSETS.PREPEND + "drone-images/powerup-rOf.png";
                 this.type = PowerUpType.RoF;
             }
         };
         Powerup.prototype.getFlashText = function () {
-            if (this.showType === PowerUpType.Spray) {
-                return "Main Weapon Upgrade!";
-            }
-            else if (this.showType === PowerUpType.Health) {
-                return "+10 Health!";
-            }
-            else if (this.showType === PowerUpType.explosionVelocity) {
-                return "Increase Missile Damage";
-            }
-            else if (this.showType === PowerUpType.RoF) {
-                return "Rate of Fire Increase";
+            switch (this.showType) {
+                case PowerUpType.Spray:
+                    return "Main Weapon Upgrade!";
+                case PowerUpType.Health:
+                    return "+10 Health!";
+                case PowerUpType.explosionVelocity:
+                    return "Increase Missile Damage";
+                case PowerUpType.RoF:
+                    return "Rate of Fire Increase";
+                case PowerUpType.Shield:
+                    return "Shields!";
+                default:
+                    return "";
             }
         };
         Powerup.prototype.flashInfo = function (type) {
@@ -333,7 +374,7 @@ define("model/powerup.drones", ["require", "exports", "model/user.drones", "serv
             }, 2000);
         };
         return Powerup;
-    }(user_drones_2.User));
+    }(user_2.User));
     exports.Powerup = Powerup;
     var PowerUpType;
     (function (PowerUpType) {
@@ -341,9 +382,10 @@ define("model/powerup.drones", ["require", "exports", "model/user.drones", "serv
         PowerUpType[PowerUpType["Health"] = 1] = "Health";
         PowerUpType[PowerUpType["explosionVelocity"] = 2] = "explosionVelocity";
         PowerUpType[PowerUpType["RoF"] = 3] = "RoF";
+        PowerUpType[PowerUpType["Shield"] = 4] = "Shield";
     })(PowerUpType = exports.PowerUpType || (exports.PowerUpType = {}));
 });
-define("model/missile", ["require", "exports", "model/user.drones", "services/asset-manager"], function (require, exports, user_drones_3, asset_manager_5) {
+define("model/missile", ["require", "exports", "model/user", "services/asset-manager"], function (require, exports, user_3, asset_manager_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var Missile = /** @class */ (function (_super) {
@@ -388,7 +430,7 @@ define("model/missile", ["require", "exports", "model/user.drones", "services/as
             }, 200);
         };
         return Missile;
-    }(user_drones_3.User));
+    }(user_3.User));
     exports.Missile = Missile;
 });
 define("model/enemyBullets", ["require", "exports", "model/projectile", "services/asset-manager"], function (require, exports, projectile_3, asset_manager_6) {
@@ -413,7 +455,7 @@ define("model/enemyBullets", ["require", "exports", "model/projectile", "service
     }(projectile_3.Projectile));
     exports.EnemyBullet = EnemyBullet;
 });
-define("model/boss.drones", ["require", "exports", "model/user.drones", "model/enemyBullets", "services/asset-manager"], function (require, exports, user_drones_4, enemyBullets_1, asset_manager_7) {
+define("model/boss.drones", ["require", "exports", "model/user", "model/enemyBullets", "services/asset-manager"], function (require, exports, user_4, enemyBullets_1, asset_manager_7) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var Boss = /** @class */ (function (_super) {
@@ -465,7 +507,7 @@ define("model/boss.drones", ["require", "exports", "model/user.drones", "model/e
             }, 300);
         };
         return Boss;
-    }(user_drones_4.User));
+    }(user_4.User));
     exports.Boss = Boss;
 });
 define("model/CanvasMenuObjects", ["require", "exports"], function (require, exports) {
@@ -474,7 +516,7 @@ define("model/CanvasMenuObjects", ["require", "exports"], function (require, exp
     /**
      * Object for clickable elements on the canvas
      */
-    var CanvasButton = /** @class */ (function () {
+    var CanvasShape = /** @class */ (function () {
         /**
          *
          * @param name
@@ -483,20 +525,15 @@ define("model/CanvasMenuObjects", ["require", "exports"], function (require, exp
          * @param w Width
          * @param h Height
          */
-        function CanvasButton(name, x, y, w, h) {
-            this.name = name;
+        function CanvasShape(x, y, w, h) {
             this.x = x;
             this.y = y;
             this.w = w;
             this.h = h;
         }
-        CanvasButton.prototype.isWithinBounds = function (posX, posY) {
-            return posX < this.x + this.w && posX > this.x &&
-                posY < this.y + this.h && posY > this.y;
-        };
-        return CanvasButton;
+        return CanvasShape;
     }());
-    exports.CanvasButton = CanvasButton;
+    exports.CanvasShape = CanvasShape;
     /**
      * Object for Text elements on the canvas
      */
@@ -519,15 +556,6 @@ define("model/CanvasMenuObjects", ["require", "exports"], function (require, exp
         return CanvasText;
     }());
     exports.CanvasText = CanvasText;
-    var CANVAS_BUTTON_NAME;
-    (function (CANVAS_BUTTON_NAME) {
-        CANVAS_BUTTON_NAME[CANVAS_BUTTON_NAME["GAME_PLAY"] = 0] = "GAME_PLAY";
-        CANVAS_BUTTON_NAME[CANVAS_BUTTON_NAME["AUDIO_PLAY"] = 1] = "AUDIO_PLAY";
-        CANVAS_BUTTON_NAME[CANVAS_BUTTON_NAME["NEXT"] = 2] = "NEXT";
-        CANVAS_BUTTON_NAME[CANVAS_BUTTON_NAME["VOLUME_UP"] = 3] = "VOLUME_UP";
-        CANVAS_BUTTON_NAME[CANVAS_BUTTON_NAME["VOLUME_DOWN"] = 4] = "VOLUME_DOWN";
-        CANVAS_BUTTON_NAME[CANVAS_BUTTON_NAME["RESTART"] = 5] = "RESTART";
-    })(CANVAS_BUTTON_NAME = exports.CANVAS_BUTTON_NAME || (exports.CANVAS_BUTTON_NAME = {}));
 });
 define("model/hud", ["require", "exports", "services/asset-manager", "model/CanvasMenuObjects"], function (require, exports, asset_manager_8, CanvasMenuObjects_1) {
     "use strict";
@@ -569,6 +597,22 @@ define("model/hud", ["require", "exports", "services/asset-manager", "model/Canv
             canvas.fillText(KillsText.word, KillsText.x, KillsText.y);
             canvas.fillText(level.word, level.x, level.y);
         };
+        /**
+         * Draw Shield
+         */
+        Hud.prototype.drawShieldTick = function (canvas, shieldTick) {
+            var displayWidth = 250;
+            var shieldBox = new CanvasMenuObjects_1.CanvasShape((canvas.canvas.width / 2) - 125, (canvas.canvas.height - 50), displayWidth, 16);
+            canvas.fillStyle = this.textColor;
+            canvas.lineWidth = 2;
+            canvas.strokeRect(shieldBox.x, shieldBox.y, shieldBox.w, shieldBox.h);
+            var fillAmount = shieldTick / 10;
+            fillAmount = fillAmount * displayWidth;
+            //fillAmount = displayWidth - fillAmount;
+            var shieldFill = new CanvasMenuObjects_1.CanvasShape((canvas.canvas.width / 2) - 125, (canvas.canvas.height - 50), fillAmount, 16);
+            canvas.fillStyle = 'rgba(0,225,0,0.5)';
+            canvas.fillRect(shieldFill.x, shieldFill.y, shieldFill.w, shieldFill.h);
+        };
         Hud.prototype.volumeHud = function (canvas) {
             canvas.drawImage(this.volumeImageObj, 0, 0);
             canvas.drawImage(this.nextImageObj, 20, 0);
@@ -599,7 +643,8 @@ define("model/hud", ["require", "exports", "services/asset-manager", "model/Canv
             title.innerText = "DRONES";
             title.setAttribute('style', 'color:lime;font:40px Verdana;font-weight: 700;');
             var startBtn = document.createElement('BUTTON');
-            startBtn.innerText = "Start";
+            startBtn.innerText = "START";
+            startBtn.id = "startBtn";
             startBtn.setAttribute('style', this.getButtonStyle(false));
             startBtn.onclick = function () {
                 Controller.start();
@@ -627,7 +672,7 @@ define("model/hud", ["require", "exports", "services/asset-manager", "model/Canv
         /**
          * Pause/settings Screen
          */
-        Hud.prototype.pauseScreen = function () {
+        Hud.prototype.pauseScreen = function (Controller) {
             this.clearGUI();
             var pauseText = document.createElement('LABEL');
             pauseText.innerText = "PAUSED";
@@ -637,12 +682,30 @@ define("model/hud", ["require", "exports", "services/asset-manager", "model/Canv
         /**
          * Game Over Screen
          */
-        Hud.prototype.gameOverScreen = function () {
+        Hud.prototype.gameOverScreen = function (Controller) {
+            var _this = this;
             this.clearGUI();
             var gameOverText = document.createElement('LABEL');
             gameOverText.innerText = "GAME OVER";
             gameOverText.setAttribute('style', 'color:lime;font:40px Verdana;');
+            var resetBtn = document.createElement('BUTTON');
+            resetBtn.innerText = "RESET";
+            resetBtn.id = "resetBtn";
+            resetBtn.setAttribute('style', this.getButtonStyle(false));
+            resetBtn.onclick = function () {
+                _this.clearGUI();
+                Controller.reset();
+            };
+            resetBtn.onmouseover = function () {
+                resetBtn.setAttribute('style', _this.getButtonStyle(true));
+            };
+            resetBtn.onmouseleave = function () {
+                resetBtn.setAttribute('style', _this.getButtonStyle(false));
+            };
             this.guiBox.insertAdjacentElement("afterbegin", gameOverText);
+            var thirdLine = this.getNewLineElem(25);
+            gameOverText.insertAdjacentElement("afterend", thirdLine);
+            thirdLine.insertAdjacentElement("afterend", resetBtn);
         };
         /**
          * Build GUI Box so I can use HTML for buttons, not canvas... canvas dom sucks
@@ -743,21 +806,20 @@ define("services/audio.service", ["require", "exports", "services/asset-manager"
     }());
     exports.AudioService = AudioService;
 });
-define("services/drones-manager.service", ["require", "exports", "model/player.drones", "services/key-status", "model/enemy.drones", "model/powerup.drones", "model/missile", "model/boss.drones", "model/hud"], function (require, exports, player_drones_1, key_status_1, enemy_drones_1, powerup_drones_1, missile_1, boss_drones_1, hud_1) {
+define("services/drones-manager.service", ["require", "exports", "model/player", "services/key-status", "model/enemy-drones", "model/powerups", "model/missile", "model/boss.drones", "model/hud", "services/audio.service"], function (require, exports, player_1, key_status_1, enemy_drones_1, powerups_1, missile_1, boss_drones_1, hud_1, audio_service_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var DronesManagerService = /** @class */ (function () {
-        function DronesManagerService(audioService) {
+        function DronesManagerService() {
             this.hud = new hud_1.Hud();
-            this.player = new player_drones_1.Player();
+            this.player = new player_1.Player();
             this.keyHandler = new key_status_1.KeyDown();
-            this.powerUp = new powerup_drones_1.Powerup();
+            this.powerUp = new powerups_1.Powerup();
             this.playerMissile = new missile_1.Missile(false);
             this.boss = new boss_drones_1.Boss();
-            this.soundService = audioService;
+            this.soundService = new audio_service_1.AudioService();
             this.dT = 0;
             this.pauseGame = false;
-            this.pauseGameTime = true;
             this.playerRoF = 0;
             this.playerBullets = [];
             this.enemyFleet = [];
@@ -768,11 +830,8 @@ define("services/drones-manager.service", ["require", "exports", "model/player.d
         }
         /** Key change resolver */
         DronesManagerService.prototype.keyChange = function (keyCode, UporDown) {
-            if (keyCode === 13) {
-                if (this.pauseGameTime) {
-                    this.timeout();
-                    this.pauseGameTime = false;
-                }
+            if (keyCode === 13 && !UporDown) {
+                this.pauseGame = !this.pauseGame;
             }
             this.keyHandler.keyChange(keyCode, UporDown);
         };
@@ -830,6 +889,9 @@ define("services/drones-manager.service", ["require", "exports", "model/player.d
             //draw HUD
             this.hud.playerStats(canvas, this.player, this.KILLS);
             this.hud.volumeHud(canvas);
+            if (this.player.hasShield) {
+                this.hud.drawShieldTick(canvas, this.player.shieldTick);
+            }
         };
         /**
          * Update the Location of the player
@@ -928,7 +990,7 @@ define("services/drones-manager.service", ["require", "exports", "model/player.d
             }
             //generate boss 
             if (!this.boss.active) {
-                if (this.KILLS % 273 === 0) {
+                if (this.KILLS % 273 === 0 && this.KILLS !== 0) {
                     this.boss.active = true;
                     this.boss.health = 500;
                     this.boss.X = canvas.canvas.width - 300;
@@ -957,9 +1019,11 @@ define("services/drones-manager.service", ["require", "exports", "model/player.d
             this.enemyFleet.forEach(function (enemy) {
                 if (!enemy.hasBeenShot) {
                     if (_this.collides(enemy, _this.player)) {
-                        _this.GameOver = _this.player.explode();
                         enemy.explode();
-                        _this.removePowerups();
+                        if (!_this.player.hasShield) {
+                            _this.removePowerups();
+                        }
+                        _this.GameOver = _this.player.explode();
                     }
                     if (_this.playerMissile.activeMissile && _this.collides(_this.playerMissile, enemy)) {
                         _this.KILLS++;
@@ -976,18 +1040,23 @@ define("services/drones-manager.service", ["require", "exports", "model/player.d
             });
             //player - powerups
             if (this.powerUp.active && this.collides(this.player, this.powerUp)) {
-                if (this.powerUp.type === powerup_drones_1.PowerUpType.Spray) {
-                    this.player.hasSprayPowerUp = true;
-                }
-                else if (this.powerUp.type === powerup_drones_1.PowerUpType.Health) {
-                    this.player.addHealth(10);
-                }
-                else if (this.powerUp.type === powerup_drones_1.PowerUpType.explosionVelocity) {
-                    this.player.hasExplosionVelocity = true;
-                    this.playerMissile.explosionVelocity = 400;
-                }
-                else if (this.powerUp.type === powerup_drones_1.PowerUpType.RoF) {
-                    this.player.hasRoFpowerUp = true;
+                switch (this.powerUp.type) {
+                    case powerups_1.PowerUpType.Spray:
+                        this.player.hasSprayPowerUp = true;
+                        break;
+                    case powerups_1.PowerUpType.Health:
+                        this.player.addHealth(10);
+                        break;
+                    case powerups_1.PowerUpType.explosionVelocity:
+                        this.player.hasExplosionVelocity = true;
+                        this.playerMissile.explosionVelocity = 400;
+                        break;
+                    case powerups_1.PowerUpType.RoF:
+                        this.player.hasRoFpowerUp = true;
+                        break;
+                    case powerups_1.PowerUpType.Shield:
+                        this.player.activateShield();
+                        break;
                 }
                 this.powerUp.flashInfo(this.powerUp.type);
                 //reset powerup
@@ -1026,8 +1095,9 @@ define("services/drones-manager.service", ["require", "exports", "model/player.d
             this.enemyBullets.forEach(function (bullet) {
                 if (_this.collides(bullet, _this.player)) {
                     bullet.active = false;
-                    _this.player.health--;
-                    _this.removePowerups();
+                    if (!_this.player.hasShield) {
+                        _this.removePowerups();
+                    }
                     _this.GameOver = _this.player.explode();
                 }
             });
@@ -1062,19 +1132,6 @@ define("services/drones-manager.service", ["require", "exports", "model/player.d
                 a.Y < (b.Y + rad) + b.Width &&
                 a.Y + a.Height > (b.Y - rad);
         };
-        /** Function that provides a timeout for pausing game.
-        * This is needed to keep the keydown event from calling continuously
-        */
-        DronesManagerService.prototype.timeout = function () {
-            var _this = this;
-            setTimeout(function () {
-                _this.pauseGame = !_this.pauseGame;
-                _this.pauseGameTime = true;
-                if (!_this.pauseGame) {
-                    _this.hud.clearGUI();
-                }
-            }, 150);
-        };
         DronesManagerService.prototype.getRandomHeight = function (canvas) {
             var rand = Math.floor(Math.random() * 1000) + 1;
             if (rand < 10) {
@@ -1100,13 +1157,14 @@ define("services/drones-manager.service", ["require", "exports", "model/player.d
     }());
     exports.DronesManagerService = DronesManagerService;
 });
-define("DronesCanvas", ["require", "exports", "services/drones-manager.service", "services/audio.service", "model/CanvasMenuObjects", "model/hud"], function (require, exports, drones_manager_service_1, audio_service_1, CanvasMenuObjects_2, hud_2) {
+define("DronesCanvas", ["require", "exports", "services/drones-manager.service", "model/hud"], function (require, exports, drones_manager_service_1, hud_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var DronesCanvas = /** @class */ (function () {
         function DronesCanvas(canvasElementName) {
             var _this = this;
             this.canvasElementName = canvasElementName;
+            this.currentTime = (new Date()).getTime();
             this.lastTime = (new Date()).getTime();
             this.interval = 1000 / 30;
             this.audioPause = false;
@@ -1118,28 +1176,27 @@ define("DronesCanvas", ["require", "exports", "services/drones-manager.service",
              * (How long does the loop take)
              */
             this.loop = function () {
-                _this.gameLoop = window.requestAnimationFrame(_this.loop);
-                var currentTime = (new Date()).getTime();
-                _this.deltaTime = (currentTime - _this.lastTime) / 1000;
-                if (!_this.gameManager.pauseGame && !_this.gameManager.GameOver) {
+                if (!_this.gameManager.GameOver && !_this.gameManager.pauseGame) {
+                    _this.gameLoop = window.requestAnimationFrame(_this.loop);
+                    var currentTime = (new Date()).getTime();
+                    _this.deltaTime = (currentTime - _this.lastTime) / 1000;
+                    if (_this.deltaTime > .2) {
+                        _this.deltaTime = .018;
+                    }
                     //normal game loop, Clear -> update -> draw -> repeat
                     _this.CanvasObject.clearRect(0, 0, _this.CanvasObject.canvas.width, _this.CanvasObject.canvas.height);
                     _this.gameManager.update(_this.CanvasObject, _this.deltaTime);
                     _this.gameManager.draw(_this.CanvasObject);
-                }
-                else if (_this.gameManager.pauseGame) {
-                    //paused game.  Draw menu box
-                    _this.buildCanvasGUI(hud_2.SCREEN_ACTIONS.PAUSE);
+                    _this.lastTime = currentTime - (_this.deltaTime % _this.interval);
                 }
                 else if (_this.gameManager.GameOver) {
                     //game over. Draw menu box
                     _this.buildCanvasGUI(hud_2.SCREEN_ACTIONS.GAME_OVER);
                 }
-                _this.lastTime = currentTime - (_this.deltaTime % _this.interval);
             };
             this.CanvasObject = canvasElementName.getContext('2d');
-            this.audioService = new audio_service_1.AudioService();
-            this.gameManager = new drones_manager_service_1.DronesManagerService(this.audioService);
+            this.gameManager = new drones_manager_service_1.DronesManagerService();
+            this.audioService = this.gameManager.soundService;
         }
         DronesCanvas.prototype.init = function () {
             var _this = this;
@@ -1154,6 +1211,20 @@ define("DronesCanvas", ["require", "exports", "services/drones-manager.service",
             });
             document.addEventListener('keyup', function (e) {
                 _this.gameManager.keyChange(e.keyCode, false);
+                if (e.keyCode === 13) {
+                    if (_this.gameManager.pauseGame) {
+                        _this.buildCanvasGUI(hud_2.SCREEN_ACTIONS.PAUSE);
+                    }
+                    else {
+                        _this.hud.clearGUI();
+                        _this.loop();
+                    }
+                }
+            });
+            window.addEventListener('resize', function () {
+                var arr = _this.getWindowSize();
+                _this.CanvasObject.canvas.width = arr[0] - 15;
+                _this.CanvasObject.canvas.height = arr[1] - 25;
             });
             /** Click event handler.  Use For canvas button handling */
             this.canvasElementName.addEventListener('click', function (e) {
@@ -1161,9 +1232,6 @@ define("DronesCanvas", ["require", "exports", "services/drones-manager.service",
                     x: e.clientX,
                     y: e.clientY
                 };
-                //do all checks for things that I can click on
-                //console.log(`Clicked: X: ${pos.x}, Y: ${pos.y}`)
-                _this.runButtonChecks(pos);
             });
         };
         DronesCanvas.prototype.start = function () {
@@ -1172,16 +1240,9 @@ define("DronesCanvas", ["require", "exports", "services/drones-manager.service",
             this.loop();
         };
         DronesCanvas.prototype.reset = function () {
-            this.gameManager = null;
-            this.gameLoop = null;
-            this.gameManager = new drones_manager_service_1.DronesManagerService(this.audioService);
-            this.audioService.next();
-            this.lastTime = (new Date()).getTime();
-            this.deltaTime = 0;
-            this.interval = 1000 / 30;
-            this.canvasButtonList = [];
-            this.hud = this.gameManager.hud;
-            this.loop();
+            window.cancelAnimationFrame(this.gameLoop);
+            this.gameManager = new drones_manager_service_1.DronesManagerService();
+            this.buildCanvasGUI(hud_2.SCREEN_ACTIONS.SPLASH);
         };
         /**
          * Function called to get Window Size of page.
@@ -1241,34 +1302,15 @@ define("DronesCanvas", ["require", "exports", "services/drones-manager.service",
                     this.hud.splashScreen(this);
                     break;
                 case hud_2.SCREEN_ACTIONS.PAUSE:
-                    this.hud.pauseScreen();
+                    this.hud.pauseScreen(this);
                     break;
                 case hud_2.SCREEN_ACTIONS.GAME_OVER:
-                    this.hud.gameOverScreen();
+                    this.hud.gameOverScreen(this);
                     break;
             }
             //buttons that are always visible
-            this.canvasButtonList.push(new CanvasMenuObjects_2.CanvasButton(CanvasMenuObjects_2.CANVAS_BUTTON_NAME.AUDIO_PLAY, 0, 0, 30, 50));
-            this.canvasButtonList.push(new CanvasMenuObjects_2.CanvasButton(CanvasMenuObjects_2.CANVAS_BUTTON_NAME.NEXT, 30, 0, 30, 50));
-        };
-        DronesCanvas.prototype.runButtonChecks = function (pos) {
-            var _this = this;
-            this.canvasButtonList.forEach(function (btn) {
-                switch (btn.name) {
-                    case CanvasMenuObjects_2.CANVAS_BUTTON_NAME.AUDIO_PLAY:
-                        if (btn.isWithinBounds(pos.x, pos.y)) {
-                            _this.audioPause = !_this.audioPause;
-                            _this.audioService.toggle(_this.audioPause);
-                            _this.hud.pauseVolume(_this.audioPause);
-                        }
-                        break;
-                    case CanvasMenuObjects_2.CANVAS_BUTTON_NAME.NEXT:
-                        if (btn.isWithinBounds(pos.x, pos.y)) {
-                            _this.audioService.next();
-                        }
-                        break;
-                }
-            });
+            // this.canvasButtonList.push(new CanvasButton(CANVAS_BUTTON_NAME.AUDIO_PLAY, 0, 0, 30, 50));
+            // this.canvasButtonList.push(new CanvasButton(CANVAS_BUTTON_NAME.NEXT, 30, 0, 30, 50));
         };
         return DronesCanvas;
     }());

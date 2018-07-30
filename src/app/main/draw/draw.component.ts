@@ -9,7 +9,6 @@ export class DrawComponent implements OnInit {
 
   isDrawing: boolean;
   color: string = 'black';
-  textColor: string = 'white';
   mousePos = { x: 0, y: 0 };
   lastPos = this.mousePos;
   @ViewChild('drawCanvas') canvasElement;
@@ -40,10 +39,6 @@ export class DrawComponent implements OnInit {
       this.color = this.getRandomColor();
       canvas.style.boxShadow = "0 0 5px black";
     }, 600);
-
-    setInterval(() => {
-      this.textColor = this.getRandomColor();
-    }, 1000);
 
     this.loop();
 
@@ -113,8 +108,7 @@ export class DrawComponent implements OnInit {
   }
 
   getRandomColor() {
-    let x = Math.ceil(Math.random() * 10);
-    return this.neonColors[x];
+    return this.neonColors[Math.floor(Math.random() * Math.floor(this.neonColors.length))];
   }
   
   buildListeners() {

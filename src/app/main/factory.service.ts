@@ -19,13 +19,13 @@ export class FactoryService {
       localStorage.setItem('kylerlove.me_darkMode', 'true');
       this.isDarkMode = true;
     }
-   }
+  }
 
-  toggleDarkMode (){
+  toggleDarkMode() {
     this.isDarkMode = !this.isDarkMode;
   }
 
-  updateSession(){
+  updateSession() {
     this.toggleDarkMode();
     if(this.isDarkMode){
       localStorage.setItem('kylerlove.me_darkMode', 'true');

@@ -13,7 +13,6 @@ export class ProjectListComponent implements OnInit {
   ngOnInit() {
   }
 
-
   redirect(url:string){
     window.open(url);
   }

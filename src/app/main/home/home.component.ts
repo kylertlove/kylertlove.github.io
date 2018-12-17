@@ -11,14 +11,11 @@ export class HomeComponent implements OnInit {
 
   public isNavbarCollapsed = true;
 
-  constructor(public factory:FactoryService) {
-  }
+  constructor(public factory:FactoryService) { }
 
-  ngOnInit() {
-
-  }
+  ngOnInit() { }
   
-  routeTo =(loc) => {
+  routeTo = (loc) => {
     if(loc == 'facebook'){
       window.open('https://www.facebook.com/kyler.love');
     }else if(loc == 'github'){
@@ -35,7 +32,7 @@ export class HomeComponent implements OnInit {
     this.changeBG();
   }
 
-  changeBG(){
+  changeBG() {
     if(this.factory.isDarkMode) {
       document.body.style.backgroundColor = 'darkgray';
     }else{

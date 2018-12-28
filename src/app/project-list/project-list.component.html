@@ -1,84 +1,8 @@
 <div class="project-body">
-    <div fxLayout="row" fxLayout.xs="column" fxLayoutGap="10px" fxLayoutGap.xs="0">
-        <mat-card fxFlex="32" fxFlex.xs="100" [ngClass]="factory.isDarkMode ? 'project-card' : 'project-card-light'" routerLink="/drones">
-            <mat-card-header>
-                <div mat-card-avatar><i class="fa fa-2x fa-rocket"></i></div>
-                <mat-card-title>Drones</mat-card-title>
-                <mat-card-subtitle>HTML5 Game</mat-card-subtitle>
-            </mat-card-header>
-            <img mat-card-image src="/assets/images/drones.png" alt="Drones">
-            <mat-card-content>
-                <p>
-                    Drones is an Arcade style space shooting game written in TypeScript
-                </p>
-            </mat-card-content>
-        </mat-card>
-        <mat-card fxFlex="32" fxFlex.xs="100" [ngClass]="factory.isDarkMode ? 'project-card' : 'project-card-light'" routerLink="/nasa">
-            <mat-card-header>
-                <div mat-card-avatar><i class="fa fa-2x fa-hand-spock-o"></i></div>
-                <mat-card-title>NASA API</mat-card-title>
-                <mat-card-subtitle>Armageddon Tracker</mat-card-subtitle>
-            </mat-card-header>
-            <img mat-card-image src="/assets/images/space.jpg" alt="NASA">
-            <mat-card-content>
-                <p>
-                    A cool API by NASA that tracks "near earth objects" + information about them
-                </p>
-            </mat-card-content>
-        </mat-card>
-        <mat-card fxFlex="32" fxFlex.xs="100" [ngClass]="factory.isDarkMode ? 'project-card' : 'project-card-light'" (click)="redirect('https://github.com/kylertlove/poe')">
-            <mat-card-header>
-                <div mat-card-avatar><i class="fa fa-2x fa-bullseye"></i></div>
-                <mat-card-title>POE</mat-card-title>
-                <mat-card-subtitle>Top Down Game</mat-card-subtitle>
-            </mat-card-header>
-            <img mat-card-image src="/assets/images/poe.png" alt="POE">
-            <mat-card-content>
-                <p>
-                    Java/Open GL Top Down Shooter
-                </p>
-            </mat-card-content>
-        </mat-card>
-    </div>
-    <div fxLayout="row" fxLayout.xs="column" fxLayoutGap="10px" fxLayoutGap.xs="0">
-        <mat-card fxFlex="32" fxFlex.xs="100" [ngClass]="factory.isDarkMode ? 'project-card' : 'project-card-light'" (click)="redirect('https://github.com/kylertlove/fulcrum')">
-            <mat-card-header>
-                <div mat-card-avatar><i class="fa fa-2x fa-tachometer"></i></div>
-                <mat-card-title>Fulcrum</mat-card-title>
-                <mat-card-subtitle>Electron Network Monitoring Tool</mat-card-subtitle>
-            </mat-card-header>
-            <img mat-card-image src="/assets/images/no-img.jpg" alt="fulcrum">
-            <mat-card-content>
-                <p>
-                    Network Monitoring tool
-                </p>
-            </mat-card-content>
-        </mat-card>
-        <mat-card fxFlex="32" fxFlex.xs="100" [ngClass]="factory.isDarkMode ? 'project-card' : 'project-card-light'" (click)="redirect('https://github.com/kylertlove/ng-statistics')">
-            <mat-card-header>
-                <div mat-card-avatar><i class="fa fa-2x fa-bar-chart"></i></div>
-                <mat-card-title>ng-statistics</mat-card-title>
-                <mat-card-subtitle>Angular Statistics Module</mat-card-subtitle>
-            </mat-card-header>
-            <img mat-card-image src="/assets/images/Statistics.jpg" alt="ng-statistics">
-            <mat-card-content>
-                <p>
-                    Building an angular module to give web apps statistic functions
-                </p>
-            </mat-card-content>
-        </mat-card>
-        <mat-card fxFlex="32" fxFlex.xs="100" [ngClass]="factory.isDarkMode ? 'project-card' : 'project-card-light'" (click)="redirect('https://github.com/kylertlove/electron-angular-boilerplate')">
-            <mat-card-header>
-                <div mat-card-avatar><i class="fa fa-2x fa-terminal"></i></div>
-                <mat-card-title>Angular/Electron</mat-card-title>
-                <mat-card-subtitle>App Boilerplate</mat-card-subtitle>
-            </mat-card-header>
-            <img mat-card-image src="/assets/images/no-img.jpg" alt="boilerplate">
-            <mat-card-content>
-                <p>
-                    Baseline Build for Angular 5/Electron Application
-                </p>
-            </mat-card-content>
-        </mat-card>
+    <div fxLayout="row wrap" fxLayout.xs="column" fxLayoutAlign="space-evenly center" fxLayoutGap.xs="0">
+        <div fxFlex="30" fxFlex.xs="100" *ngFor="let projectItem of projectItems">
+            <project-item cardIcon="{{projectItem.cardIcon}}" cardTitle="{{projectItem.cardTitle}}" cardSubTitle="{{projectItem.cardSubTitle}}" cardContent="{{projectItem.cardContent}}" cardImg="{{projectItem.cardImg}}" cardImgAlt="{{projectItem.cardImgAlt}}" cardRouterLink="{{projectItem.cardRouterLink}}">
+            </project-item>
+        </div>
     </div>
 </div>

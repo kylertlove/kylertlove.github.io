@@ -10,10 +10,11 @@ import { FactoryService } from 'app/main/factory.service';
 import { DrawComponent } from './main/draw/draw.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import 'hammerjs';
+import { ProjectItemComponent } from './project-item/project-item.component';
 
 @NgModule({
   declarations: [
-    AppComponent, HomeComponent, DrawComponent, ProjectListComponent
+    AppComponent, HomeComponent, DrawComponent, ProjectListComponent, ProjectItemComponent
   ],
   imports: [
     BrowserModule, BrowserAnimationsModule, 

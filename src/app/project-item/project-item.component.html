@@ -1,0 +1,13 @@
+<mat-card [ngClass]="factory.isDarkMode ? 'project-card' : 'project-card-light'" (click)="routeTo(cardRouterLink)">
+    <mat-card-header>
+        <div mat-card-avatar><i class="fa fa-2x {{cardIcon}}"></i></div>
+        <mat-card-title>{{cardTitle}}</mat-card-title>
+        <mat-card-subtitle>{{cardSubTitle}}</mat-card-subtitle>
+    </mat-card-header>
+    <img mat-card-image src="{{cardImg}}" alt="{{cardImgAlt}}">
+    <mat-card-content>
+        <p style="text-align: center;">
+            {{cardContent}}
+        </p>
+    </mat-card-content>
+</mat-card>

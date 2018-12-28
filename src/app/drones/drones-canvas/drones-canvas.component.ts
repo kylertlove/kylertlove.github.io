@@ -16,7 +16,6 @@ export class DronesCanvasComponent {
     });
     
     requirejs(["DronesCanvas"], function(dc) {
-      console.log(dc);
       var app = new dc.DronesCanvas(
           document.getElementById('canvasElem')
       );

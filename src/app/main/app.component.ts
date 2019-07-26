@@ -9,14 +9,10 @@ import { FactoryService } from 'app/main/factory.service';
 })
 export class AppComponent implements OnInit {
 
-  constructor(public _factoryService: FactoryService) { }
+  constructor(public factory: FactoryService) { }
 
   ngOnInit(): void {
-    this.initialize();
-  }
-
-  initialize() {
-    this._factoryService.prepareApp();
+   
   }
 
 }

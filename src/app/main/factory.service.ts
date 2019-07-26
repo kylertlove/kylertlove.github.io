@@ -7,7 +7,6 @@ import { Injectable } from '@angular/core';
 export class FactoryService {
 
   public isDarkMode: boolean;
-  private readonly key: string = 'thisisuseless';
 
   constructor() {
     if(localStorage.getItem('kylerlove.me_darkMode')){
@@ -26,13 +25,6 @@ export class FactoryService {
     this.isDarkMode = !this.isDarkMode;
   }
 
-  prepareApp(){
-    setTimeout(() => {
-      const key_ = this.key;
-      this.atLast(key_);
-    }, 690);
-  }
-
   updateSession() {
     this.toggleDarkMode();
     if(this.isDarkMode){
@@ -40,9 +32,5 @@ export class FactoryService {
     }else{
       localStorage.setItem('kylerlove.me_darkMode', 'false');
     }
-  }
-
-  private atLast(uselessParameter: string){
-    console.log('immabitch')
   }
 }
